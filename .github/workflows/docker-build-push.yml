@@ -32,26 +32,27 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          tags: go-app:latest  # Local image tag for the application
-          load: true         # Load the image into the local Docker daemon
+          tags: go-app:latest  # Tag your image locally
+          load: true         # Load image to local docker daemon
           platform: linux/arm64
 
       - name: Copy docker-compose.yml to manager node
         run: |
           scp docker-compose.yml ${{ env.USER }}@${{ env.MANAGER_NODE_IP }}:/home/${{ env.USER }}/docker-compose.yml
 
-      - name: Copy Traefik configuration (if needed)
+      - name: Copy Traefik configuration (if available)
         run: |
           ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} "mkdir -p /home/${{ env.USER }}/traefik/letsencrypt"
-          scp -r traefik/letsencrypt/* ${{ env.USER }}@${{ env.MANAGER_NODE_IP }}:/home/${{ env.USER }}/traefik/letsencrypt/
+          # Copy files only if there are any. This doesn't produce an error if the folder is empty.
+          scp -r traefik/letsencrypt/* ${{ env.USER }}@${{ env.MANAGER_NODE_IP }}:/home/${{ env.USER }}/traefik/letsencrypt/ || true
 
       - name: Initialize Docker Swarm (if necessary)
         run: |
           ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
-          "docker info --format '{{.Swarm.LocalNodeState}}' | grep active || docker swarm init"
+            "docker info --format '{{.Swarm.LocalNodeState}}' | grep active || docker swarm init"
             
       - name: Deploy to Docker Swarm
         run: |
           echo "Deploying to Docker Swarm..."
           ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
-          "docker stack deploy --compose-file /home/${{ env.USER }}/docker-compose.yml goapp"
+            "docker stack deploy --compose-file /home/${{ env.USER }}/docker-compose.yml goapp"

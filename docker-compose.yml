@@ -4,22 +4,23 @@ services:
   traefik:
     image: traefik:v2.9
     command:
-      # Enable both HTTP and HTTPS entrypoints
+      # Define entrypoints for HTTP and HTTPS:
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      # Enable Docker provider so that Traefik auto-configures itself based on container labels
+      # Enable Docker provider; Traefik will monitor containers for labels:
       - "--providers.docker=true"
-      # Enable the Traefik dashboard (for production, secure this!)
+      # Enable Traefik dashboard (secure it in production)
       - "--api.insecure=true"
-      # ACME (Let's Encrypt) configuration for automatic certificate generation and renewal
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=your-email@example.com"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      # Let’s Encrypt configuration: automatic certificate retrieval
+      - "--certificatesResolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesResolvers.myresolver.acme.email=your-email@example.com"
+      - "--certificatesResolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
-      - "80:80" # Expose HTTP
-      - "443:443" # Expose HTTPS
+      - "80:80" # Expose HTTP on the host
+      - "443:443" # Expose HTTPS on the host
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      # Persist Let's Encrypt certificates:
       - "./traefik/letsencrypt:/letsencrypt"
     networks:
       - web
@@ -33,18 +34,18 @@ services:
         delay: 10s
       restart_policy:
         condition: on-failure
-    # Remove direct port publishing, since Traefik will route to this container over the "web" network
+    # Traefik uses the Docker network to route to your container.
     networks:
       - web
     labels:
       - "traefik.enable=true"
-      # Create a router for the service by matching the domain api.postprove.com (case sensitive)
+      # Route traffic that arrives at Host `api.postprove.com`
       - "traefik.http.routers.go-app.rule=Host(`api.postprove.com`)"
-      # Specify which Traefik entrypoints the router connects to
+      # Attach this router to both HTTP and HTTPS entrypoints.
       - "traefik.http.routers.go-app.entrypoints=web,websecure"
-      # Use the ACME resolver for TLS (this will only trigger if you access via HTTPS)
+      # Activate TLS with our ACME resolver (only applies when accessed via HTTPS)
       - "traefik.http.routers.go-app.tls.certresolver=myresolver"
-      # Tell Traefik which port inside the container to route traffic to (this is the internal port your app is listening on)
+      # Internal port on which our Go container listens.
       - "traefik.http.services.go-app.loadbalancer.server.port=8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
