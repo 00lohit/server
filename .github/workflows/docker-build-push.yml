@@ -40,7 +40,13 @@ jobs:
         run: |
           scp docker-compose.yml ${{ env.USER }}@${{ env.MANAGER_NODE_IP }}:/home/${{ env.USER }}
 
+      - name: Initialize Docker Swarm (if necessary)
+        run: |
+          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
+           "docker info --format '{{.Swarm.LocalNodeState}}' | grep active || docker swarm init"
+            
       - name: Deploy to Docker Swarm
         run: |
           echo "Deploying to Docker Swarm..."
-          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} "docker stack deploy --compose-file /home/${{ env.USER }}/docker-compose.yml goapp"
+          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
+            "docker stack deploy --compose-file /home/${{ env.USER }}/docker-compose.yml goapp"
