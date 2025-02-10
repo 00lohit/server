@@ -1,17 +1,14 @@
 version: "3.8"
 services:
   go-app:
-    image: go-app:latest # Local image name
-    build:
-      context: . # Build from the current directory
-      dockerfile: Dockerfile # Use the Dockerfile in the current directory
+    image: go-app:latest
     ports:
       - "8080:80"
     deploy:
-      replicas: 3
+      replicas: 2
       update_config:
-        parallelism: 1
-        delay: 10s
+        parallelism: 1 # Update one replica at a time
+        delay: 10s # Brief delay between updates
       restart_policy:
         condition: on-failure
     healthcheck:

@@ -33,7 +33,7 @@ jobs:
           context: .
           file: Dockerfile
           tags: go-app:latest  # Local image tag
-          load: true # Load the image into the local Docker daemon
+          load: true         # Load the image into the local Docker daemon
           platform: linux/arm64
 
       - name: Copy docker-compose.yml to manager node
