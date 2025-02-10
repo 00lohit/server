@@ -6,7 +6,7 @@ services:
       context: . # Build from the current directory
       dockerfile: Dockerfile # Use the Dockerfile in the current directory
     ports:
-      - "8080:8080"
+      - "8080:80"
     deploy:
       replicas: 3
       update_config:
