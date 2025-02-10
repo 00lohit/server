@@ -13,26 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Get current user
-        run: whoami
-
-      - name: Check if user is in docker group
-        id: check_docker_group
-        run: |
-          if groups $USER | grep -q docker; then
-            echo "::set-output name=in_docker_group::true"
-          else
-            echo "::set-output name=in_docker_group::false"
-          fi
-
-      - name: Add user to docker group (if not already in group)
-        if: steps.check_docker_group.outputs.in_docker_group == 'false'
-        run: sudo usermod -aG docker $USER
-
-      - name: Restart Docker daemon (if user was added to group)
-        if: steps.check_docker_group.outputs.in_docker_group == 'false'
-        run: sudo systemctl restart docker
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
