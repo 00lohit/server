@@ -16,6 +16,14 @@ jobs:
       - name: Set USER environment variable
         run: echo "USER=$(whoami)" >> $GITHUB_ENV
 
+      - name: Set MANAGER_NODE_IP environment variable
+        run: echo "MANAGER_NODE_IP=${{ secrets.MANAGER_NODE_IP }}" >> $GITHUB_ENV
+
+      - name: Add SSH key to agent
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -30,8 +38,5 @@ jobs:
 
       - name: Deploy to Docker Swarm
         run: |
-          # Add commands to deploy to your Docker Swarm
-          # For example:
-          # docker stack deploy --compose-file docker-compose.yml goapp
           echo "Deploying to Docker Swarm..."
-          ssh ${{ env.USER }}@<MANAGER_NODE_IP> "docker stack deploy --compose-file docker-compose.yml goapp" # Replace with your actual command
+          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} "docker stack deploy --compose-file docker-compose.yml goapp"
