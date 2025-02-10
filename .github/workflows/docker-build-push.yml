@@ -36,7 +36,11 @@ jobs:
           load: true # Load the image into the local Docker daemon
           platform: linux/arm64
 
+      - name: Copy docker-compose.yml to manager node
+        run: |
+          scp docker-compose.yml ${{ env.USER }}@${{ env.MANAGER_NODE_IP }}:/home/${{ env.USER }}
+
       - name: Deploy to Docker Swarm
         run: |
           echo "Deploying to Docker Swarm..."
-          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} "docker stack deploy --compose-file docker-compose.yml goapp"
+          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} "docker stack deploy --compose-file /home/${{ env.USER }}/docker-compose.yml goapp"
