@@ -28,14 +28,14 @@ jobs:
         run: |
           echo "Building Go application on manager node..."
           ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
-            "cd /path/to/go-traefik-swarm/goapp && go build -o main ."
+            "cd /home/ubuntu/actions-runner/_work/server/server/goapp && go build -o main ."
 
       - name: Copy docker-compose.yml to manager node
         run: |
-          scp docker-compose.yml ${{ env.USER }}@${{ env.MANAGER_NODE_IP }}:/path/to/go-traefik-swarm/goapp
+          scp server/goapp/docker-compose.yml ${{ env.USER }}@${{ env.MANAGER_NODE_IP }}:/home/ubuntu/actions-runner/_work/server/server/goapp
 
       - name: Deploy Go Application
         run: |
           echo "Deploying Go Application..."
           ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
-            "docker stack deploy -c /path/to/go-traefik-swarm/goapp/docker-compose.yml goapp"
+            "docker stack deploy -c /home/ubuntu/actions-runner/_work/server/server/goapp/docker-compose.yml goapp"
