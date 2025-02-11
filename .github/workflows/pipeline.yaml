@@ -23,15 +23,15 @@ jobs:
       - name: Copy application files to server
         run: |
           echo "Copying application files to the server..."
-          mkdir -p /home/ubuntu/actions-runner/_work/server/server
-          cp -r $GITHUB_WORKSPACE/goapp /home/ubuntu/actions-runner/_work/server/server/
-          cp -r $GITHUB_WORKSPACE/traefik /home/ubuntu/actions-runner/_work/server/server/
+          mkdir -p /home/ubuntu/server
+          cp -r /home/ubuntu/server /home/ubuntu/actions-runner/_work/server/server
+
 
       - name: Deploy Traefik (if not already deployed)
         run: |
           echo "Deploying Traefik..."
           if ! docker stack ls | grep -q "traefik"; then
-            cd /home/ubuntu/actions-runner/_work/server/server/traefik && \
+            cd /home/ubuntu/server/traefik && \
             docker stack deploy -c docker-compose.yml traefik
           else
             echo "Traefik is already deployed."
@@ -40,5 +40,5 @@ jobs:
       - name: Deploy Go Application
         run: |
           echo "Deploying Go Application..."
-          cd /home/ubuntu/actions-runner/_work/server/server/goapp && \
+          cd /home/ubuntu/server/goapp && \
           docker stack deploy -c docker-compose.yml goapp
