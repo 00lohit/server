@@ -1,4 +1,4 @@
-name: Deploy Go Application (Without Docker Image)
+name: Deploy API
 
 on:
   push:
@@ -13,29 +13,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set USER environment variable
-        run: echo "USER=$(whoami)" >> $GITHUB_ENV
-
-      - name: Set MANAGER_NODE_IP environment variable
-        run: echo "MANAGER_NODE_IP=${{ secrets.MANAGER_NODE_IP }}" >> $GITHUB_ENV
-
-      - name: Add SSH key to agent
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Build Go Application on Manager Node
+      - name: Copy application files to server
         run: |
-          echo "Building Go application on manager node..."
-          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
-            "cd /home/ubuntu/actions-runner/_work/server/server/goapp && go build -o main ."
+          mkdir -p /home/ubuntu/server
+          cp -r server/goapp /home/ubuntu/server/
+          cp -r server/traefik /home/ubuntu/server/
 
-      - name: Copy docker-compose.yml to manager node
+      - name: Deploy Traefik (if not already deployed)
         run: |
-          scp server/goapp/docker-compose.yml ${{ env.USER }}@${{ env.MANAGER_NODE_IP }}:/home/ubuntu/actions-runner/_work/server/server/goapp
+          if ! docker stack ls | grep -q "traefik"; then
+            cd /home/ubuntu/server/traefik && \
+            docker stack deploy -c docker-compose.yml traefik
+          fi
 
       - name: Deploy Go Application
         run: |
-          echo "Deploying Go Application..."
-          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
-            "docker stack deploy -c /home/ubuntu/actions-runner/_work/server/server/goapp/docker-compose.yml goapp"
+          cd /home/ubuntu/server/goapp && \
+          docker stack deploy -c docker-compose.yml goapp

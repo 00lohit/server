@@ -1,12 +1,18 @@
 version: "3.9"
 services:
   goapp:
-    image: your-dockerhub-username/go-app:latest
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.goapp.rule=Host(`your-domain.com`)"
-      - "traefik.http.routers.goapp.entrypoints=web"
-      - "traefik.http.services.goapp.loadbalancer.server.port=8080"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.goapp.rule=Host(`api.postprove.com`)"
+        - "traefik.http.services.goapp.loadbalancer.server.port=8080"
+        - "traefik.http.routers.goapp.entrypoints=web"
     networks:
       - traefik-net
 

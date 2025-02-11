@@ -1,3 +1,7 @@
+api:
+  dashboard: true
+  insecure: true  # Don't use this in production!
+
 entryPoints:
   web:
     address: ":80"
@@ -7,3 +11,9 @@ providers:
     swarmMode: true
     exposedByDefault: false
     network: traefik-net
+
+log:
+  level: INFO
+
+# Optional: Add access logs
+accessLog: {}

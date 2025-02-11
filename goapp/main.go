@@ -6,10 +6,22 @@ import (
 )
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, World!\n")
+	// Add CORS headers
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	// Handle OPTIONS request for CORS preflight
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	fmt.Fprintf(w, "Hello from api.postprove.com!\n")
 }
 
 func main() {
 	http.HandleFunc("/", helloHandler)
+	fmt.Println("Server starting on :8080")
 	http.ListenAndServe(":8080", nil)
 }
