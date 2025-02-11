@@ -13,30 +13,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          submodules: true
-          path: .
+          submodules: true  # Include this if you have submodules
 
-      - name: List workspace contents (with tree)
+      - name: List workspace contents
         run: |
           echo "Workspace contents:"
-          if command -v tree >/dev/null 2>&1; then
-            tree $GITHUB_WORKSPACE
-          else
-            ls -l $GITHUB_WORKSPACE
-          fi
+          ls -R $GITHUB_WORKSPACE  # List all files and directories recursively
 
       - name: Copy application files to server
         run: |
-          cd $GITHUB_WORKSPACE
+          echo "Copying application files to the server..."
           mkdir -p /home/ubuntu/actions-runner/_work/server/server
-          cp -r goapp /home/ubuntu/actions-runner/_work/server/server
-          cp -r traefik /home/ubuntu/actions-runner/_work/server/server
+          cp -r $GITHUB_WORKSPACE/server/goapp /home/ubuntu/actions-runner/_work/server/server/
+          cp -r $GITHUB_WORKSPACE/server/traefik /home/ubuntu/actions-runner/_work/server/server/
 
       - name: Deploy Traefik (if not already deployed)
         run: |
-          cd /home/ubuntu/actions-runner/_work/server/server/traefik && \
-          docker stack deploy -c docker-compose.yml traefik
+          echo "Deploying Traefik..."
+          if ! docker stack ls | grep -q "traefik"; then
+            cd /home/ubuntu/actions-runner/_work/server/server/traefik && \
+            docker stack deploy -c docker-compose.yml traefik
+          else
+            echo "Traefik is already deployed."
+          fi
+
       - name: Deploy Go Application
         run: |
+          echo "Deploying Go Application..."
           cd /home/ubuntu/actions-runner/_work/server/server/goapp && \
           docker stack deploy -c docker-compose.yml goapp
