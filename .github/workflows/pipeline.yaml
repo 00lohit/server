@@ -1,68 +1,41 @@
-name: pipeline
-on:
- push:
-   branches:
-     - "main"
+name: Deploy Go Application (Without Docker Image)
 
-permissions:
-  packages: write
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  run-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23.x'
-      - name: Install dependencies
-        run: go get .
-      - name: Test with the Go CLI
-        run: go test ./...
-
-  build-and-push-image:
-    runs-on: ubuntu-latest
-    needs:
-      - run-tests
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: https://ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/dreamsofcode-io/zenstats:latest
-            ghcr.io/dreamsofcode-io/zenstats:${{ github.sha }}
-
   deploy:
-    runs-on: ubuntu-latest
-    needs:
-      - build-and-push-image
+    runs-on: self-hosted
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: create env file
-      run: |
-        echo "GIT_COMMIT_HASH=${{ github.sha }}" >> ./envfile
+      - name: Set USER environment variable
+        run: echo "USER=$(whoami)" >> $GITHUB_ENV
 
-    - name: Docker Stack Deploy
-      uses: cssnr/stack-deploy-action@v1
-      with:
-        name: zenfulstats
-        file: docker-stack.yaml
-        host: zenful.site
-        user: deploy
-        ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
-        env_file: ./envfile
+      - name: Set MANAGER_NODE_IP environment variable
+        run: echo "MANAGER_NODE_IP=${{ secrets.MANAGER_NODE_IP }}" >> $GITHUB_ENV
+
+      - name: Add SSH key to agent
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Build Go Application on Manager Node
+        run: |
+          echo "Building Go application on manager node..."
+          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
+            "cd /path/to/go-traefik-swarm/goapp && go build -o main ."
+
+      - name: Copy docker-compose.yml to manager node
+        run: |
+          scp docker-compose.yml ${{ env.USER }}@${{ env.MANAGER_NODE_IP }}:/path/to/go-traefik-swarm/goapp
+
+      - name: Deploy Go Application
+        run: |
+          echo "Deploying Go Application..."
+          ssh ${{ env.USER }}@${{ env.MANAGER_NODE_IP }} \
+            "docker stack deploy -c /path/to/go-traefik-swarm/goapp/docker-compose.yml goapp"

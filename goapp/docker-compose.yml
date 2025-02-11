@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  goapp:
+    image: your-dockerhub-username/go-app:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.goapp.rule=Host(`your-domain.com`)"
+      - "traefik.http.routers.goapp.entrypoints=web"
+      - "traefik.http.services.goapp.loadbalancer.server.port=8080"
+    networks:
+      - traefik-net
+
+networks:
+  traefik-net:
+    external: true

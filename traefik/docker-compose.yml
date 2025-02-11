@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  traefik:
+    image: traefik:v3.0
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/traefik.yml
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - traefik-net
+
+networks:
+  traefik-net:
+    driver: overlay
