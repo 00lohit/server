@@ -24,7 +24,8 @@ jobs:
           rsync -av --exclude '.git' ./ /home/ubuntu/server/
 
 
-      - name: Deploy Go Application
+      - name: Update application
         run: |
           cd /home/ubuntu/server/goapp && \
-          docker stack deploy -c docker-compose.yml goapp
+          docker-compose pull && \
+          docker-compose up -d
