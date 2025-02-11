@@ -24,8 +24,8 @@ jobs:
         run: |
           echo "Copying application files to the server..."
           mkdir -p /home/ubuntu/actions-runner/_work/server/server
-          cp -r $GITHUB_WORKSPACE/server/goapp /home/ubuntu/actions-runner/_work/server/server/
-          cp -r $GITHUB_WORKSPACE/server/traefik /home/ubuntu/actions-runner/_work/server/server/
+          cp -r $GITHUB_WORKSPACE/goapp /home/ubuntu/actions-runner/_work/server/server/
+          cp -r $GITHUB_WORKSPACE/traefik /home/ubuntu/actions-runner/_work/server/server/
 
       - name: Deploy Traefik (if not already deployed)
         run: |
