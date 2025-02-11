@@ -23,12 +23,6 @@ jobs:
           mkdir -p /home/ubuntu/server
           rsync -av --exclude '.git' ./ /home/ubuntu/server/
 
-      - name: Deploy Traefik (if not already deployed)
-        run: |
-          if ! docker stack ls | grep -q "traefik"; then
-            cd /home/ubuntu/server/traefik && \
-            docker stack deploy -c docker-compose.yml traefik
-          fi
 
       - name: Deploy Go Application
         run: |
