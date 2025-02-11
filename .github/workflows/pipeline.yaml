@@ -21,7 +21,7 @@ jobs:
       - name: Copy application files to server
         run: |
           mkdir -p /home/ubuntu/server
-          cp -r ./ /home/ubuntu/server/
+          rsync -av --exclude '.git' ./ /home/ubuntu/server/
 
       - name: Deploy Traefik (if not already deployed)
         run: |
