@@ -27,17 +27,15 @@ jobs:
 
       - name: Copy application files to server
         run: |
+          cd $GITHUB_WORKSPACE
           mkdir -p /home/ubuntu/actions-runner/_work/server/server
           cp -r goapp /home/ubuntu/actions-runner/_work/server/server
           cp -r traefik /home/ubuntu/actions-runner/_work/server/server
 
       - name: Deploy Traefik (if not already deployed)
         run: |
-          if ! docker stack ls | grep -q "traefik"; then
-            cd /home/ubuntu/actions-runner/_work/server/server/traefik && \
-            docker stack deploy -c docker-compose.yml traefik
-          fi
-
+          cd /home/ubuntu/actions-runner/_work/server/server/traefik && \
+          docker stack deploy -c docker-compose.yml traefik
       - name: Deploy Go Application
         run: |
           cd /home/ubuntu/actions-runner/_work/server/server/goapp && \
