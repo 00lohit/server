@@ -15,6 +15,7 @@ jobs:
 
       - name: Copy application files to server
         run: |
+          cd $GITHUB_WORKSPACE
           mkdir -p /home/ubuntu/server
           cp -r server/goapp /home/ubuntu/server/
           cp -r server/traefik /home/ubuntu/server/
