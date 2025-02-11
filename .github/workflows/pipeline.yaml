@@ -27,5 +27,4 @@ jobs:
       - name: Update application
         run: |
           cd /home/ubuntu/server/goapp && \
-          docker-compose pull && \
-          docker-compose up -d
+          docker compose up -d

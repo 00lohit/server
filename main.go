@@ -2,30 +2,27 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
-func helloHandler(w http.ResponseWriter, r *http.Request) {
-	// Add CORS headers
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+func hello(w http.ResponseWriter, req *http.Request) {
 
-	// Handle OPTIONS request for CORS preflight
-	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
-		return
+	fmt.Fprintf(w, "hello s\ns")
+}
+
+func headers(w http.ResponseWriter, req *http.Request) {
+
+	for name, headers := range req.Header {
+		for _, h := range headers {
+			fmt.Fprintf(w, "%v: %v\n", name, h)
+		}
 	}
-
-	fmt.Fprintf(w, "Hello from api.postprove.com!\n")
 }
 
 func main() {
-	http.HandleFunc("/", helloHandler)
-	fmt.Println("Server starting on :8080")
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		log.Fatal("Server failed to start: ", err)
-	}
+
+	http.HandleFunc("/hello", hello)
+	http.HandleFunc("/headers", headers)
+
+	http.ListenAndServe(":8000", nil)
 }

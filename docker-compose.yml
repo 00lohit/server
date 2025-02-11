@@ -1,14 +1,12 @@
-version: "3.9"
-
+version: "3.8"
 services:
-  goapp:
+  web:
     build:
       context: .
+      # Correct the path to your Dockerfile
       dockerfile: Dockerfile
-    image: server
     ports:
-      - "8080:8080"
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
+      - 8000:8000
+    # Important to bind/mount your codebase dir to /app dir for live reload
+    volumes:
+      - ./:/app
