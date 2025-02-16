@@ -1,4 +1,3 @@
-// app.js
 import express from "express";
 import { readCSV, writeCSV } from "./db.js";
 
@@ -100,7 +99,7 @@ app.delete("/items/:id", async (req, res) => {
       res.status(200).json({
         success: true,
         message: "Item deleted successfully",
-      }); // 200 OK with message
+      });
     } else {
       res.status(404).json({ success: false, message: "Item not found" });
     }
